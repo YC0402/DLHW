@@ -2,9 +2,8 @@
 <html>
 
 <head>
-    <title>Yuchan's learning app</title>
+    <title>Yuchan's Learning App</title>
 
-    <!-- CSS: Change how the app looks -->
     <style>
         body {
             font-family: Arial;
@@ -13,56 +12,65 @@
         }
 
         button {
-            font-size: 40px;
+            font-size: 30px;
             padding: 20px;
-            margin: 7px;
-            background-color: Yellow;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .correct {
+            background-color: lightgreen;
+        }
+
+        .wrong {
+            background-color: lightcoral;
+        }
+
+        #feedback {
+            margin-top: 30px;
+            font-size: 28px;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- HTML: Change what learners see -->
-
     <h1>Vocabulary Quiz</h1>
 
     <p>What does "in charge of" mean?</p>
 
-    <button onclick="checkAnswer('participate')">
+    <button class="wrong" onclick="checkAnswer('wrong')">
         Participate in
     </button>
 
-    <button onclick="checkAnswer('avoid')">
-        get responsible for something
+    <button class="correct" onclick="checkAnswer('correct')">
+        Be responsible for something
     </button>
 
-    <button onclick="checkAnswer('watch')">
+    <button class="wrong" onclick="checkAnswer('wrong')">
         Watch
     </button>
 
     <h3 id="feedback"></h3>
 
-
-    <!-- JavaScript: Change what happens -->
-
     <script>
-
         function checkAnswer(answer) {
 
-            if (answer === "participate") {
+            if (answer === "correct") {
                 document.getElementById("feedback").innerText =
                     "Correct! Well done!";
             }
 
             else {
                 document.getElementById("feedback").innerText =
-                    "Incorrect. The answer is Participate in.";
+                    "Incorrect. The answer is 'Be responsible for something.'";
             }
 
         }
-
     </script>
 
 </body>
+
 </html>

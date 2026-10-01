@@ -1,547 +1,446 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Yuchan's English Education Quiz 🌸</title>
+    <title>Yuchan's Bounce Ball Game</title>
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
             margin: 0;
-            min-height: 100vh;
-
-            /* 꽃 사진 배경 */
-            background-image:
-                linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.75)),
-                url("https://images.unsplash.com/photo-1490750967868-88aa4486c946");
-
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-
-        .container {
-            width: 80%;
-            max-width: 750px;
-            margin: 50px auto;
-            padding: 40px;
-
-            background-color: rgba(255, 255, 255, 0.93);
-
-            border-radius: 30px;
-
-            box-shadow:
-                0px 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        h1 {
-            font-size: 42px;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 19px;
-            color: #777;
-        }
-
-        .flower {
-            font-size: 35px;
-            margin: 10px;
-        }
-
-        #question {
-            font-size: 27px;
-            font-weight: bold;
-            margin: 30px;
-            line-height: 1.5;
-        }
-
-        button {
-            display: block;
-            width: 90%;
-
-            font-size: 18px;
-
-            padding: 16px;
-
-            margin: 12px auto;
-
-            border: 2px solid #ffc6d9;
-
-            border-radius: 18px;
-
-            cursor: pointer;
-
-            background-color: #fff5f8;
-
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background-color: #ffe1eb;
-
-            transform: scale(1.03);
-
-            box-shadow:
-                0px 5px 12px rgba(0,0,0,0.12);
-        }
-
-        #feedback {
-            margin-top: 25px;
-
-            font-size: 25px;
-
-            min-height: 35px;
-        }
-
-        #score {
-            font-size: 19px;
-
-            background-color: #fff0f5;
-
-            display: inline-block;
-
-            padding: 10px 20px;
-
-            border-radius: 20px;
-        }
-
-        .progress-container {
-            width: 90%;
-
-            height: 15px;
-
-            background-color: #eeeeee;
-
-            border-radius: 20px;
-
-            margin: 20px auto;
-
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(#87CEEB, #ffffff);
             overflow: hidden;
         }
 
-        #progress {
-            height: 100%;
-
-            width: 0%;
-
-            background-color: #ff9fbd;
-
-            transition: width 0.5s;
+        h1 {
+            margin: 10px;
         }
 
-        .bottomFlowers {
-            margin-top: 25px;
-
-            font-size: 30px;
-
-            letter-spacing: 8px;
+        #info {
+            font-size: 20px;
+            margin-bottom: 5px;
         }
 
+        canvas {
+            background: #dff6ff;
+            border: 4px solid #333;
+            border-radius: 15px;
+        }
     </style>
 </head>
 
-
 <body>
 
-<div class="container">
+<h1>🏀 Yuchan's Bounce Ball</h1>
 
-    <div class="flower">
-        🌸 🌷 🌼 🌺 🌻
-    </div>
-
-    <h1>📚 English Education Quiz</h1>
-
-    <p class="subtitle">
-        Test your English Education knowledge! ✨
-    </p>
-
-
-    <div class="progress-container">
-        <div id="progress"></div>
-    </div>
-
-
-    <p id="question"></p>
-
-
-    <div id="answers"></div>
-
-
-    <h3 id="feedback"></h3>
-
-
-    <p id="score"></p>
-
-
-    <div class="bottomFlowers">
-        🌷 🌸 🌼 🌸 🌷
-    </div>
-
+<div id="info">
+    ⬅️ ➡️ 방향키로 움직이세요!
+    <br>
+    Score: <span id="score">0</span>
 </div>
 
+<canvas id="gameCanvas" width="600" height="600"></canvas>
 
 <script>
 
-const wordBank = [
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+
+// ================================
+// 공 설정
+// ================================
+
+const ball = {
+    x: 100,
+    y: 450,
+    radius: 18,
+
+    speedX: 0,
+
+    speedY: -10
+};
+
+
+// 중력
+const gravity = 0.45;
+
+
+// 좌우 움직임 속도
+const moveSpeed = 5;
+
+
+// 점수
+let score = 0;
+
+
+// 게임 종료 여부
+let gameOver = false;
+
+
+// ================================
+// 발판
+// ================================
+
+const platforms = [
 
     {
-        word: "Grammar Translation Method",
-        correct:
-        "A method focusing on grammar rules, translation, and reading written texts"
+        x: 50,
+        y: 520,
+        width: 150,
+        height: 20
     },
 
     {
-        word: "Direct Method",
-        correct:
-        "A method that teaches the target language without using the learners' first language"
+        x: 260,
+        y: 440,
+        width: 130,
+        height: 20
     },
 
     {
-        word: "Audiolingual Method",
-        correct:
-        "A method emphasizing repetition, drills, habit formation, and spoken language"
+        x: 80,
+        y: 350,
+        width: 120,
+        height: 20
     },
 
     {
-        word: "Communicative Language Teaching",
-        correct:
-        "An approach that emphasizes meaningful communication and real-life language use"
+        x: 350,
+        y: 270,
+        width: 140,
+        height: 20
     },
 
     {
-        word: "Communicative Competence",
-        correct:
-        "The ability to use language appropriately and effectively in social contexts"
+        x: 180,
+        y: 180,
+        width: 130,
+        height: 20
     },
 
     {
-        word: "Linguistic Competence",
-        correct:
-        "Knowledge of grammar, vocabulary, pronunciation, and language structure"
-    },
-
-    {
-        word: "Contrastive Analysis",
-        correct:
-        "The comparison of two languages to predict possible learner difficulties"
-    },
-
-    {
-        word: "Error Analysis",
-        correct:
-        "The study of learner errors to understand the process of second language acquisition"
-    },
-
-    {
-        word: "Interlanguage",
-        correct:
-        "A developing language system created by second language learners"
-    },
-
-    {
-        word: "Intralingual Error",
-        correct:
-        "An error caused by difficulty within the target language itself"
-    },
-
-    {
-        word: "Interlingual Error",
-        correct:
-        "An error caused by influence from the learner's first language"
-    },
-
-    {
-        word: "Constructivism",
-        correct:
-        "A theory that learners actively construct knowledge through experience and interaction"
-    },
-
-    {
-        word: "Behaviorism",
-        correct:
-        "A theory that explains learning through stimulus, response, reinforcement, and habit formation"
-    },
-
-    {
-        word: "Compensation Strategy",
-        correct:
-        "A strategy used to overcome gaps in language knowledge during communication"
-    },
-
-    {
-        word: "Circumlocution",
-        correct:
-        "Explaining an unknown word by describing its meaning in other words"
-    },
-
-    {
-        word: "Series Method",
-        correct:
-        "A method that teaches language through a sequence of connected actions"
+        x: 420,
+        y: 90,
+        width: 120,
+        height: 20
     }
 
 ];
 
 
-// 문제 랜덤 섞기
-const shuffledWords =
-    [...wordBank].sort(() => Math.random() - 0.5);
+// ================================
+// 키 입력
+// ================================
+
+let leftPressed = false;
+let rightPressed = false;
 
 
-// 총 5문제
-const quiz =
-    shuffledWords.slice(0, 5);
+document.addEventListener("keydown", function(event) {
+
+    if (event.key === "ArrowLeft") {
+        leftPressed = true;
+    }
+
+    if (event.key === "ArrowRight") {
+        rightPressed = true;
+    }
+
+});
 
 
-let currentQuestion = 0;
+document.addEventListener("keyup", function(event) {
 
-let score = 0;
+    if (event.key === "ArrowLeft") {
+        leftPressed = false;
+    }
 
+    if (event.key === "ArrowRight") {
+        rightPressed = false;
+    }
 
-
-function showQuestion() {
-
-    const question =
-        quiz[currentQuestion];
-
-
-    document.getElementById("question").innerText =
-        "🌼 Question " +
-        (currentQuestion + 1) +
-        " / 5 🌼\n\nWhat is \"" +
-        question.word +
-        "\"?";
+});
 
 
-    document.getElementById("feedback").innerText = "";
+// ================================
+// 공 그리기
+// ================================
 
+function drawBall() {
 
-    const answersDiv =
-        document.getElementById("answers");
+    ctx.beginPath();
 
-
-    answersDiv.innerHTML = "";
-
-
-    let choices =
-        [question.correct];
-
-
-    const wrongAnswers =
-        wordBank
-
-        .filter(
-            item =>
-            item.word !== question.word
-        )
-
-        .map(
-            item =>
-            item.correct
-        )
-
-        .sort(
-            () =>
-            Math.random() - 0.5
-        )
-
-        .slice(0, 4);
-
-
-    choices =
-        choices.concat(wrongAnswers);
-
-
-    choices.sort(
-        () =>
-        Math.random() - 0.5
+    ctx.arc(
+        ball.x,
+        ball.y,
+        ball.radius,
+        0,
+        Math.PI * 2
     );
 
+    ctx.fillStyle = "#ff4d6d";
 
-    choices.forEach(
-        function(choice) {
+    ctx.fill();
 
-            const button =
-                document.createElement("button");
+    ctx.strokeStyle = "#333";
 
+    ctx.lineWidth = 3;
 
-            button.innerText =
-                "🌷 " + choice;
+    ctx.stroke();
 
-
-            button.onclick =
-                function() {
-
-                    checkAnswer(
-                        choice,
-                        button
-                    );
-
-                };
-
-
-            answersDiv.appendChild(button);
-
-        }
-    );
-
-
-    document.getElementById("score").innerText =
-        "⭐ Score: " +
-        score +
-        " / 5";
-
-
-    // 진행바
-    const progressPercent =
-        (currentQuestion / 5) * 100;
-
-
-    document.getElementById("progress").style.width =
-        progressPercent + "%";
+    ctx.closePath();
 
 }
 
 
+// ================================
+// 발판 그리기
+// ================================
 
-function checkAnswer(answer, button) {
+function drawPlatforms() {
 
-    const correctAnswer =
-        quiz[currentQuestion].correct;
+    platforms.forEach(function(platform) {
 
+        ctx.fillStyle = "#66cc66";
 
-    if (answer === correctAnswer) {
-
-        button.style.backgroundColor =
-            "#c8f7d4";
-
-
-        button.style.borderColor =
-            "#66c982";
-
-
-        button.innerText =
-            "✅ " + answer;
-
-
-        document.getElementById("feedback").innerText =
-            "🌸 Correct! Well done! 잘했어! 🎉";
-
-
-        score++;
-
-
-        setTimeout(
-            function() {
-
-                currentQuestion++;
-
-
-                if (
-                    currentQuestion <
-                    quiz.length
-                ) {
-
-                    showQuestion();
-
-                }
-
-                else {
-
-                    showResult();
-
-                }
-
-            },
-
-            1200
+        ctx.fillRect(
+            platform.x,
+            platform.y,
+            platform.width,
+            platform.height
         );
 
+        ctx.strokeStyle = "#333";
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+            platform.x,
+            platform.y,
+            platform.width,
+            platform.height
+        );
+
+    });
+
+}
+
+
+// ================================
+// 충돌 검사
+// ================================
+
+function checkPlatformCollision() {
+
+    platforms.forEach(function(platform) {
+
+        const ballBottom =
+            ball.y + ball.radius;
+
+        const previousBottom =
+            ball.y + ball.radius - ball.speedY;
+
+
+        const insideX =
+            ball.x + ball.radius > platform.x &&
+            ball.x - ball.radius < platform.x + platform.width;
+
+
+        if (
+            insideX &&
+            ball.speedY > 0 &&
+            ballBottom >= platform.y &&
+            previousBottom <= platform.y + 10
+        ) {
+
+            // 발판 위에 착지
+            ball.y =
+                platform.y - ball.radius;
+
+
+            // 자동으로 다시 튀기
+            ball.speedY = -11;
+
+
+            // 점수 증가
+            score++;
+
+            document.getElementById("score").innerText =
+                score;
+
+        }
+
+    });
+
+}
+
+
+// ================================
+// 공 움직이기
+// ================================
+
+function moveBall() {
+
+    if (leftPressed) {
+
+        ball.speedX = -moveSpeed;
+
     }
 
+    else if (rightPressed) {
+
+        ball.speedX = moveSpeed;
+
+    }
 
     else {
 
-        button.style.backgroundColor =
-            "#ffd6dc";
+        ball.speedX *= 0.85;
+
+    }
 
 
-        button.style.borderColor =
-            "#ff8c9a";
+    ball.x += ball.speedX;
 
 
-        button.innerText =
-            "❌ " + answer;
+    // 중력
+    ball.speedY += gravity;
+
+    ball.y += ball.speedY;
 
 
-        document.getElementById("feedback").innerText =
-            "🥲 Incorrect! 틀렸어. 다시 골라봐!";
+    // 왼쪽 벽
+    if (
+        ball.x - ball.radius < 0
+    ) {
+
+        ball.x = ball.radius;
+
+        ball.speedX = 0;
+
+    }
+
+
+    // 오른쪽 벽
+    if (
+        ball.x + ball.radius > canvas.width
+    ) {
+
+        ball.x =
+            canvas.width - ball.radius;
+
+        ball.speedX = 0;
+
+    }
+
+
+    // 발판 충돌
+    checkPlatformCollision();
+
+
+    // 화면 위까지 도착하면 승리
+    if (
+        ball.y < 30
+    ) {
+
+        gameOver = true;
+
+        setTimeout(function() {
+
+            alert(
+                "🎉 게임 클리어!\n점수: " + score
+            );
+
+            restartGame();
+
+        }, 100);
+
+    }
+
+
+    // 아래로 떨어지면 게임 오버
+    if (
+        ball.y > canvas.height + 50
+    ) {
+
+        gameOver = true;
+
+        setTimeout(function() {
+
+            alert(
+                "💥 Game Over!\n점수: " + score
+            );
+
+            restartGame();
+
+        }, 100);
 
     }
 
 }
 
 
+// ================================
+// 게임 다시 시작
+// ================================
 
-function showResult() {
+function restartGame() {
 
-    document.getElementById("progress").style.width =
-        "100%";
+    ball.x = 100;
 
+    ball.y = 450;
 
-    document.getElementById("question").innerText =
-        "🌸 Quiz Finished! 🌸";
+    ball.speedX = 0;
 
+    ball.speedY = -10;
 
-    document.getElementById("answers").innerHTML =
-        "";
-
-
-    let message = "";
-
-
-    if (score === 5) {
-
-        message =
-            "🏆 Perfect!! 영어교육론 마스터! 🌟";
-
-    }
-
-    else if (score >= 3) {
-
-        message =
-            "👏 Great job! 조금만 더 공부하면 완벽해! 🌷";
-
-    }
-
-    else {
-
-        message =
-            "📚 Keep studying! 다시 도전해보자! 💪";
-
-    }
-
-
-    document.getElementById("feedback").innerText =
-        "Your score: " +
-        score +
-        " / 5\n\n" +
-        message;
-
+    score = 0;
 
     document.getElementById("score").innerText =
-        "🌷 Thanks for playing! 🌷";
+        score;
+
+    gameOver = false;
 
 }
 
 
-showQuestion();
+// ================================
+// 게임 반복
+// ================================
+
+function gameLoop() {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    drawPlatforms();
+
+    drawBall();
+
+
+    if (!gameOver) {
+
+        moveBall();
+
+    }
+
+
+    requestAnimationFrame(gameLoop);
+
+}
+
+
+// 게임 시작
+gameLoop();
 
 </script>
 
 </body>
-
 </html>

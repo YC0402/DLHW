@@ -2,293 +2,545 @@
 <html>
 
 <head>
-    <title>Yuchan's English Education Quiz</title>
+    <meta charset="UTF-8">
+    <title>Yuchan's English Education Quiz 🌸</title>
 
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             text-align: center;
-            margin: 50px;
-            background-color: #f5f5f5;
+            margin: 0;
+            min-height: 100vh;
+
+            /* 꽃 사진 배경 */
+            background-image:
+                linear-gradient(rgba(255,255,255,0.75), rgba(255,255,255,0.75)),
+                url("https://images.unsplash.com/photo-1490750967868-88aa4486c946");
+
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 750px;
+            margin: 50px auto;
+            padding: 40px;
+
+            background-color: rgba(255, 255, 255, 0.93);
+
+            border-radius: 30px;
+
+            box-shadow:
+                0px 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         h1 {
-            font-size: 40px;
+            font-size: 42px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 19px;
+            color: #777;
+        }
+
+        .flower {
+            font-size: 35px;
+            margin: 10px;
         }
 
         #question {
-            font-size: 28px;
+            font-size: 27px;
+            font-weight: bold;
             margin: 30px;
+            line-height: 1.5;
         }
 
         button {
             display: block;
-            width: 600px;
-            font-size: 20px;
-            padding: 18px;
+            width: 90%;
+
+            font-size: 18px;
+
+            padding: 16px;
+
             margin: 12px auto;
-            border: none;
-            border-radius: 10px;
+
+            border: 2px solid #ffc6d9;
+
+            border-radius: 18px;
+
             cursor: pointer;
-            background-color: lightyellow;
+
+            background-color: #fff5f8;
+
+            transition: 0.3s;
         }
 
         button:hover {
-            background-color: gold;
+            background-color: #ffe1eb;
+
+            transform: scale(1.03);
+
+            box-shadow:
+                0px 5px 12px rgba(0,0,0,0.12);
         }
 
         #feedback {
-            margin-top: 30px;
-            font-size: 26px;
+            margin-top: 25px;
+
+            font-size: 25px;
+
+            min-height: 35px;
         }
 
         #score {
-            font-size: 20px;
-            margin-top: 20px;
+            font-size: 19px;
+
+            background-color: #fff0f5;
+
+            display: inline-block;
+
+            padding: 10px 20px;
+
+            border-radius: 20px;
         }
+
+        .progress-container {
+            width: 90%;
+
+            height: 15px;
+
+            background-color: #eeeeee;
+
+            border-radius: 20px;
+
+            margin: 20px auto;
+
+            overflow: hidden;
+        }
+
+        #progress {
+            height: 100%;
+
+            width: 0%;
+
+            background-color: #ff9fbd;
+
+            transition: width 0.5s;
+        }
+
+        .bottomFlowers {
+            margin-top: 25px;
+
+            font-size: 30px;
+
+            letter-spacing: 8px;
+        }
+
     </style>
 </head>
 
+
 <body>
 
-    <h1>English Education Quiz</h1>
+<div class="container">
+
+    <div class="flower">
+        🌸 🌷 🌼 🌺 🌻
+    </div>
+
+    <h1>📚 English Education Quiz</h1>
+
+    <p class="subtitle">
+        Test your English Education knowledge! ✨
+    </p>
+
+
+    <div class="progress-container">
+        <div id="progress"></div>
+    </div>
+
 
     <p id="question"></p>
 
+
     <div id="answers"></div>
+
 
     <h3 id="feedback"></h3>
 
+
     <p id="score"></p>
 
-    <script>
 
-        const wordBank = [
+    <div class="bottomFlowers">
+        🌷 🌸 🌼 🌸 🌷
+    </div>
 
-            {
-                word: "Grammar Translation Method",
-                correct: "A method focusing on grammar rules, translation, and reading written texts"
-            },
-
-            {
-                word: "Direct Method",
-                correct: "A method that teaches the target language without using the learners' first language"
-            },
-
-            {
-                word: "Audiolingual Method",
-                correct: "A method emphasizing repetition, drills, habit formation, and spoken language"
-            },
-
-            {
-                word: "Communicative Language Teaching",
-                correct: "An approach that emphasizes meaningful communication and real-life language use"
-            },
-
-            {
-                word: "Communicative Competence",
-                correct: "The ability to use language appropriately and effectively in social contexts"
-            },
-
-            {
-                word: "Linguistic Competence",
-                correct: "Knowledge of grammar, vocabulary, pronunciation, and language structure"
-            },
-
-            {
-                word: "Contrastive Analysis",
-                correct: "The comparison of two languages to predict possible learner difficulties"
-            },
-
-            {
-                word: "Error Analysis",
-                correct: "The study of learner errors to understand the process of second language acquisition"
-            },
-
-            {
-                word: "Interlanguage",
-                correct: "A developing language system created by second language learners"
-            },
-
-            {
-                word: "Intralingual Error",
-                correct: "An error caused by difficulty within the target language itself"
-            },
-
-            {
-                word: "Interlingual Error",
-                correct: "An error caused by influence from the learner's first language"
-            },
-
-            {
-                word: "Constructivism",
-                correct: "A theory that learners actively construct knowledge through experience and interaction"
-            },
-
-            {
-                word: "Structural Linguistics",
-                correct: "An approach viewing language as a system of structures and patterns"
-            },
-
-            {
-                word: "Generative Linguistics",
-                correct: "A theory emphasizing the mental rules that allow speakers to produce unlimited sentences"
-            },
-
-            {
-                word: "Behaviorism",
-                correct: "A theory that explains learning through stimulus, response, reinforcement, and habit formation"
-            },
-
-            {
-                word: "Cognitive Psychology",
-                correct: "An approach focusing on mental processes such as memory, perception, and problem solving"
-            },
-
-            {
-                word: "Compensation Strategy",
-                correct: "A strategy used to overcome gaps in language knowledge during communication"
-            },
-
-            {
-                word: "Circumlocution",
-                correct: "Explaining an unknown word by describing its meaning in other words"
-            },
-
-            {
-                word: "Paraphrase",
-                correct: "Expressing the same meaning using different words"
-            },
-
-            {
-                word: "Series Method",
-                correct: "A method that teaches language through a sequence of connected actions"
-            }
-
-        ];
+</div>
 
 
-        // Randomly mix all questions
-        const shuffledWords = [...wordBank].sort(() => Math.random() - 0.5);
+<script>
 
-        // Select only 5 questions
-        const quiz = shuffledWords.slice(0, 5);
+const wordBank = [
 
-        let currentQuestion = 0;
-        let score = 0;
+    {
+        word: "Grammar Translation Method",
+        correct:
+        "A method focusing on grammar rules, translation, and reading written texts"
+    },
+
+    {
+        word: "Direct Method",
+        correct:
+        "A method that teaches the target language without using the learners' first language"
+    },
+
+    {
+        word: "Audiolingual Method",
+        correct:
+        "A method emphasizing repetition, drills, habit formation, and spoken language"
+    },
+
+    {
+        word: "Communicative Language Teaching",
+        correct:
+        "An approach that emphasizes meaningful communication and real-life language use"
+    },
+
+    {
+        word: "Communicative Competence",
+        correct:
+        "The ability to use language appropriately and effectively in social contexts"
+    },
+
+    {
+        word: "Linguistic Competence",
+        correct:
+        "Knowledge of grammar, vocabulary, pronunciation, and language structure"
+    },
+
+    {
+        word: "Contrastive Analysis",
+        correct:
+        "The comparison of two languages to predict possible learner difficulties"
+    },
+
+    {
+        word: "Error Analysis",
+        correct:
+        "The study of learner errors to understand the process of second language acquisition"
+    },
+
+    {
+        word: "Interlanguage",
+        correct:
+        "A developing language system created by second language learners"
+    },
+
+    {
+        word: "Intralingual Error",
+        correct:
+        "An error caused by difficulty within the target language itself"
+    },
+
+    {
+        word: "Interlingual Error",
+        correct:
+        "An error caused by influence from the learner's first language"
+    },
+
+    {
+        word: "Constructivism",
+        correct:
+        "A theory that learners actively construct knowledge through experience and interaction"
+    },
+
+    {
+        word: "Behaviorism",
+        correct:
+        "A theory that explains learning through stimulus, response, reinforcement, and habit formation"
+    },
+
+    {
+        word: "Compensation Strategy",
+        correct:
+        "A strategy used to overcome gaps in language knowledge during communication"
+    },
+
+    {
+        word: "Circumlocution",
+        correct:
+        "Explaining an unknown word by describing its meaning in other words"
+    },
+
+    {
+        word: "Series Method",
+        correct:
+        "A method that teaches language through a sequence of connected actions"
+    }
+
+];
 
 
-        function showQuestion() {
-
-            const question = quiz[currentQuestion];
-
-            document.getElementById("question").innerText =
-                "Question " + (currentQuestion + 1) +
-                " / 5: What is \"" + question.word + "\"?";
-
-            document.getElementById("feedback").innerText = "";
-
-            const answersDiv = document.getElementById("answers");
-            answersDiv.innerHTML = "";
-
-            // Correct answer
-            let choices = [question.correct];
-
-            // Select 4 wrong answers
-            const wrongAnswers = wordBank
-                .filter(item => item.word !== question.word)
-                .map(item => item.correct)
-                .sort(() => Math.random() - 0.5)
-                .slice(0, 4);
-
-            choices = choices.concat(wrongAnswers);
-
-            // Shuffle answer choices
-            choices.sort(() => Math.random() - 0.5);
+// 문제 랜덤 섞기
+const shuffledWords =
+    [...wordBank].sort(() => Math.random() - 0.5);
 
 
-            choices.forEach(function(choice) {
+// 총 5문제
+const quiz =
+    shuffledWords.slice(0, 5);
 
-                const button = document.createElement("button");
 
-                button.innerText = choice;
+let currentQuestion = 0;
 
-                button.onclick = function() {
-                    checkAnswer(choice, button);
+let score = 0;
+
+
+
+function showQuestion() {
+
+    const question =
+        quiz[currentQuestion];
+
+
+    document.getElementById("question").innerText =
+        "🌼 Question " +
+        (currentQuestion + 1) +
+        " / 5 🌼\n\nWhat is \"" +
+        question.word +
+        "\"?";
+
+
+    document.getElementById("feedback").innerText = "";
+
+
+    const answersDiv =
+        document.getElementById("answers");
+
+
+    answersDiv.innerHTML = "";
+
+
+    let choices =
+        [question.correct];
+
+
+    const wrongAnswers =
+        wordBank
+
+        .filter(
+            item =>
+            item.word !== question.word
+        )
+
+        .map(
+            item =>
+            item.correct
+        )
+
+        .sort(
+            () =>
+            Math.random() - 0.5
+        )
+
+        .slice(0, 4);
+
+
+    choices =
+        choices.concat(wrongAnswers);
+
+
+    choices.sort(
+        () =>
+        Math.random() - 0.5
+    );
+
+
+    choices.forEach(
+        function(choice) {
+
+            const button =
+                document.createElement("button");
+
+
+            button.innerText =
+                "🌷 " + choice;
+
+
+            button.onclick =
+                function() {
+
+                    checkAnswer(
+                        choice,
+                        button
+                    );
+
                 };
 
-                answersDiv.appendChild(button);
 
-            });
-
-
-            document.getElementById("score").innerText =
-                "Score: " + score + " / 5";
+            answersDiv.appendChild(button);
 
         }
+    );
 
 
-        function checkAnswer(answer, button) {
-
-            const correctAnswer = quiz[currentQuestion].correct;
-
-            if (answer === correctAnswer) {
-
-                button.style.backgroundColor = "lightgreen";
-
-                document.getElementById("feedback").innerText =
-                    "Correct! 잘했어! 🎉";
-
-                score++;
-
-                setTimeout(function() {
-
-                    currentQuestion++;
-
-                    if (currentQuestion < quiz.length) {
-
-                        showQuestion();
-
-                    } else {
-
-                        showResult();
-
-                    }
-
-                }, 1000);
-
-            }
-
-            else {
-
-                button.style.backgroundColor = "lightcoral";
-
-                document.getElementById("feedback").innerText =
-                    "Incorrect! 틀렸어. 다시 골라봐!";
-
-            }
-
-        }
+    document.getElementById("score").innerText =
+        "⭐ Score: " +
+        score +
+        " / 5";
 
 
-        function showResult() {
-
-            document.getElementById("question").innerText =
-                "Quiz Finished!";
-
-            document.getElementById("answers").innerHTML = "";
-
-            document.getElementById("feedback").innerText =
-                "Your final score is " + score + " / 5 🎉";
-
-            document.getElementById("score").innerText = "";
-
-        }
+    // 진행바
+    const progressPercent =
+        (currentQuestion / 5) * 100;
 
 
-        showQuestion();
+    document.getElementById("progress").style.width =
+        progressPercent + "%";
 
-    </script>
+}
+
+
+
+function checkAnswer(answer, button) {
+
+    const correctAnswer =
+        quiz[currentQuestion].correct;
+
+
+    if (answer === correctAnswer) {
+
+        button.style.backgroundColor =
+            "#c8f7d4";
+
+
+        button.style.borderColor =
+            "#66c982";
+
+
+        button.innerText =
+            "✅ " + answer;
+
+
+        document.getElementById("feedback").innerText =
+            "🌸 Correct! Well done! 잘했어! 🎉";
+
+
+        score++;
+
+
+        setTimeout(
+            function() {
+
+                currentQuestion++;
+
+
+                if (
+                    currentQuestion <
+                    quiz.length
+                ) {
+
+                    showQuestion();
+
+                }
+
+                else {
+
+                    showResult();
+
+                }
+
+            },
+
+            1200
+        );
+
+    }
+
+
+    else {
+
+        button.style.backgroundColor =
+            "#ffd6dc";
+
+
+        button.style.borderColor =
+            "#ff8c9a";
+
+
+        button.innerText =
+            "❌ " + answer;
+
+
+        document.getElementById("feedback").innerText =
+            "🥲 Incorrect! 틀렸어. 다시 골라봐!";
+
+    }
+
+}
+
+
+
+function showResult() {
+
+    document.getElementById("progress").style.width =
+        "100%";
+
+
+    document.getElementById("question").innerText =
+        "🌸 Quiz Finished! 🌸";
+
+
+    document.getElementById("answers").innerHTML =
+        "";
+
+
+    let message = "";
+
+
+    if (score === 5) {
+
+        message =
+            "🏆 Perfect!! 영어교육론 마스터! 🌟";
+
+    }
+
+    else if (score >= 3) {
+
+        message =
+            "👏 Great job! 조금만 더 공부하면 완벽해! 🌷";
+
+    }
+
+    else {
+
+        message =
+            "📚 Keep studying! 다시 도전해보자! 💪";
+
+    }
+
+
+    document.getElementById("feedback").innerText =
+        "Your score: " +
+        score +
+        " / 5\n\n" +
+        message;
+
+
+    document.getElementById("score").innerText =
+        "🌷 Thanks for playing! 🌷";
+
+}
+
+
+showQuestion();
+
+</script>
 
 </body>
 

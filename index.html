@@ -9,28 +9,42 @@
             font-family: Arial;
             text-align: center;
             margin: 50px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            font-size: 40px;
+        }
+
+        #question {
+            font-size: 28px;
+            margin: 30px;
         }
 
         button {
-            font-size: 30px;
-            padding: 20px;
-            margin: 10px;
+            display: block;
+            width: 500px;
+            font-size: 22px;
+            padding: 18px;
+            margin: 12px auto;
             border: none;
             border-radius: 10px;
             cursor: pointer;
+            background-color: lightyellow;
         }
 
-        .correct {
-            background-color: lightgreen;
-        }
-
-        .wrong {
-            background-color: lightcoral;
+        button:hover {
+            background-color: gold;
         }
 
         #feedback {
             margin-top: 30px;
-            font-size: 28px;
+            font-size: 26px;
+        }
+
+        #score {
+            font-size: 20px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -39,36 +53,172 @@
 
     <h1>Vocabulary Quiz</h1>
 
-    <p>What does "in charge of" mean?</p>
+    <p id="question"></p>
 
-    <button class="wrong" onclick="checkAnswer('wrong')">
-        Participate in
-    </button>
-
-    <button class="correct" onclick="checkAnswer('correct')">
-        Be responsible for something
-    </button>
-
-    <button class="wrong" onclick="checkAnswer('wrong')">
-        Watch
-    </button>
+    <div id="answers"></div>
 
     <h3 id="feedback"></h3>
 
-    <script>
-        function checkAnswer(answer) {
+    <p id="score"></p>
 
-            if (answer === "correct") {
+    <script>
+
+        const quiz = [
+
+            {
+                word: "meticulous",
+                correct: "Very careful and precise",
+                choices: [
+                    "Very careless",
+                    "Very careful and precise",
+                    "Extremely angry",
+                    "Easy to understand",
+                    "Quick to disappear"
+                ]
+            },
+
+            {
+                word: "ambiguous",
+                correct: "Having more than one possible meaning",
+                choices: [
+                    "Having more than one possible meaning",
+                    "Extremely important",
+                    "Easy to predict",
+                    "Very dangerous",
+                    "Clearly organized"
+                ]
+            },
+
+            {
+                word: "inevitable",
+                correct: "Certain to happen",
+                choices: [
+                    "Impossible to understand",
+                    "Certain to happen",
+                    "Easy to avoid",
+                    "Very unusual",
+                    "Unlikely to occur"
+                ]
+            },
+
+            {
+                word: "detrimental",
+                correct: "Causing harm or damage",
+                choices: [
+                    "Providing benefits",
+                    "Causing harm or damage",
+                    "Making something easier",
+                    "Being very unusual",
+                    "Creating excitement"
+                ]
+            },
+
+            {
+                word: "plausible",
+                correct: "Seeming reasonable or believable",
+                choices: [
+                    "Clearly impossible",
+                    "Extremely confusing",
+                    "Seeming reasonable or believable",
+                    "Very disappointing",
+                    "Completely unnecessary"
+                ]
+            }
+
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+
+        function showQuestion() {
+
+            const question = quiz[currentQuestion];
+
+            document.getElementById("question").innerText =
+                "Question " + (currentQuestion + 1) +
+                " / 5: What does \"" + question.word + "\" mean?";
+
+            document.getElementById("feedback").innerText = "";
+
+            const answersDiv = document.getElementById("answers");
+
+            answersDiv.innerHTML = "";
+
+            question.choices.forEach(function(choice) {
+
+                const button = document.createElement("button");
+
+                button.innerText = choice;
+
+                button.onclick = function() {
+                    checkAnswer(choice, button);
+                };
+
+                answersDiv.appendChild(button);
+
+            });
+
+            document.getElementById("score").innerText =
+                "Score: " + score + " / 5";
+        }
+
+
+        function checkAnswer(answer, button) {
+
+            const correctAnswer = quiz[currentQuestion].correct;
+
+            if (answer === correctAnswer) {
+
+                button.style.backgroundColor = "lightgreen";
+
                 document.getElementById("feedback").innerText =
-                    "Correct! Well done 잘했어!";
+                    "Correct! Well done! 잘했어! 🎉";
+
+                score++;
+
+                setTimeout(function() {
+
+                    currentQuestion++;
+
+                    if (currentQuestion < quiz.length) {
+                        showQuestion();
+                    } else {
+                        showResult();
+                    }
+
+                }, 1000);
+
             }
 
             else {
+
+                button.style.backgroundColor = "lightcoral";
+
                 document.getElementById("feedback").innerText =
-                    "틀렸어 Incorrect. The answer is 'Be responsible for something.'";
+                    "Incorrect! 틀렸어. 다시 골라봐!";
+
             }
+        }
+
+
+        function showResult() {
+
+            document.getElementById("question").innerText =
+                "Quiz Finished!";
+
+            document.getElementById("answers").innerHTML = "";
+
+            document.getElementById("feedback").innerText =
+                "Your final score is " + score + " / 5 🎉";
+
+            document.getElementById("score").innerText = "";
 
         }
+
+
+        showQuestion();
+
     </script>
 
 </body>

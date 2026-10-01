@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
-    <title>Yuchan's Bounce Ball Game</title>
+    <title>Yuchan's Infinite Bounce Ball</title>
 
     <style>
         body {
             margin: 0;
             text-align: center;
             font-family: Arial, sans-serif;
-            background: linear-gradient(#87CEEB, #ffffff);
+            background: linear-gradient(#7fd3ff, #fefefe);
             overflow: hidden;
         }
 
         h1 {
-            margin: 10px;
+            margin: 10px 0 5px;
         }
 
         #info {
-            font-size: 20px;
-            margin-bottom: 5px;
+            font-size: 19px;
+            margin-bottom: 8px;
         }
 
         canvas {
-            background: #dff6ff;
-            border: 4px solid #333;
+            background: linear-gradient(#dff6ff, #ffffff);
+            border: 4px solid #222;
             border-radius: 15px;
         }
     </style>
@@ -32,415 +33,568 @@
 
 <body>
 
-<h1>🏀 Yuchan's Bounce Ball</h1>
+    <h1>🏀 Infinite Bounce Ball</h1>
 
-<div id="info">
-    ⬅️ ➡️ 방향키로 움직이세요!
-    <br>
-    Score: <span id="score">0</span>
-</div>
+    <div id="info">
+        ⬅️ ➡️ Move |
+        Score: <span id="score">0</span> |
+        Level: <span id="level">1</span>
+    </div>
 
-<canvas id="gameCanvas" width="600" height="600"></canvas>
+    <canvas id="gameCanvas" width="600" height="650"></canvas>
 
-<script>
+    <script>
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
+        const ball = {
+            x: 300,
+            y: 500,
+            radius: 17,
+            speedX: 0,
+            speedY: -11
+        };
 
-// ================================
-// 공 설정
-// ================================
+        let gravity = 0.48;
+        let moveSpeed = 5.5;
 
-const ball = {
-    x: 100,
-    y: 450,
-    radius: 18,
+        let score = 0;
+        let level = 1;
+        let gameOver = false;
 
-    speedX: 0,
+        let leftPressed = false;
+        let rightPressed = false;
 
-    speedY: -10
-};
+        let platforms = [];
 
 
-// 중력
-const gravity = 0.45;
+        // =========================
+        // 키보드 입력
+        // =========================
 
+        document.addEventListener("keydown", function(event) {
 
-// 좌우 움직임 속도
-const moveSpeed = 5;
+            if (event.key === "ArrowLeft") {
+                leftPressed = true;
+            }
 
+            if (event.key === "ArrowRight") {
+                rightPressed = true;
+            }
 
-// 점수
-let score = 0;
+        });
 
 
-// 게임 종료 여부
-let gameOver = false;
+        document.addEventListener("keyup", function(event) {
 
+            if (event.key === "ArrowLeft") {
+                leftPressed = false;
+            }
 
-// ================================
-// 발판
-// ================================
+            if (event.key === "ArrowRight") {
+                rightPressed = false;
+            }
 
-const platforms = [
+        });
 
-    {
-        x: 50,
-        y: 520,
-        width: 150,
-        height: 20
-    },
 
-    {
-        x: 260,
-        y: 440,
-        width: 130,
-        height: 20
-    },
+        // =========================
+        // 랜덤 숫자
+        // =========================
 
-    {
-        x: 80,
-        y: 350,
-        width: 120,
-        height: 20
-    },
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
 
-    {
-        x: 350,
-        y: 270,
-        width: 140,
-        height: 20
-    },
 
-    {
-        x: 180,
-        y: 180,
-        width: 130,
-        height: 20
-    },
+        // =========================
+        // 발판 생성
+        // =========================
 
-    {
-        x: 420,
-        y: 90,
-        width: 120,
-        height: 20
-    }
+        function createPlatforms() {
 
-];
+            platforms = [];
 
+            // 첫 시작 발판
+            platforms.push({
+                x: 220,
+                y: 580,
+                width: 160,
+                height: 18,
+                moving: false,
+                speed: 0
+            });
 
-// ================================
-// 키 입력
-// ================================
 
-let leftPressed = false;
-let rightPressed = false;
+            let y = 500;
 
+            for (let i = 0; i < 8; i++) {
 
-document.addEventListener("keydown", function(event) {
+                const width = random(80, 150);
 
-    if (event.key === "ArrowLeft") {
-        leftPressed = true;
-    }
+                const x = random(
+                    20,
+                    canvas.width - width - 20
+                );
 
-    if (event.key === "ArrowRight") {
-        rightPressed = true;
-    }
+                const isMoving =
+                    Math.random() < 0.30;
 
-});
+                platforms.push({
 
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: 18,
 
-document.addEventListener("keyup", function(event) {
+                    moving: isMoving,
 
-    if (event.key === "ArrowLeft") {
-        leftPressed = false;
-    }
+                    speed:
+                        isMoving
+                        ? random(1, 2.5)
+                        : 0
 
-    if (event.key === "ArrowRight") {
-        rightPressed = false;
-    }
+                });
 
-});
+                y -= random(65, 95);
 
+            }
 
-// ================================
-// 공 그리기
-// ================================
+        }
 
-function drawBall() {
 
-    ctx.beginPath();
+        // =========================
+        // 발판 움직임
+        // =========================
 
-    ctx.arc(
-        ball.x,
-        ball.y,
-        ball.radius,
-        0,
-        Math.PI * 2
-    );
+        function movePlatforms() {
 
-    ctx.fillStyle = "#ff4d6d";
+            platforms.forEach(function(platform) {
 
-    ctx.fill();
+                if (platform.moving) {
 
-    ctx.strokeStyle = "#333";
+                    platform.x += platform.speed;
 
-    ctx.lineWidth = 3;
+                    if (
+                        platform.x <= 0 ||
+                        platform.x + platform.width >= canvas.width
+                    ) {
 
-    ctx.stroke();
+                        platform.speed *= -1;
 
-    ctx.closePath();
+                    }
 
-}
+                }
 
+            });
 
-// ================================
-// 발판 그리기
-// ================================
+        }
 
-function drawPlatforms() {
 
-    platforms.forEach(function(platform) {
+        // =========================
+        // 발판 그리기
+        // =========================
 
-        ctx.fillStyle = "#66cc66";
+        function drawPlatforms() {
 
-        ctx.fillRect(
-            platform.x,
-            platform.y,
-            platform.width,
-            platform.height
-        );
+            platforms.forEach(function(platform) {
 
-        ctx.strokeStyle = "#333";
+                if (platform.moving) {
+                    ctx.fillStyle = "#ffb347";
+                } else {
+                    ctx.fillStyle = "#66cc66";
+                }
 
-        ctx.lineWidth = 2;
+                ctx.fillRect(
+                    platform.x,
+                    platform.y,
+                    platform.width,
+                    platform.height
+                );
 
-        ctx.strokeRect(
-            platform.x,
-            platform.y,
-            platform.width,
-            platform.height
-        );
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
 
-    });
+                ctx.strokeRect(
+                    platform.x,
+                    platform.y,
+                    platform.width,
+                    platform.height
+                );
 
-}
+            });
 
+        }
 
-// ================================
-// 충돌 검사
-// ================================
 
-function checkPlatformCollision() {
+        // =========================
+        // 공 그리기
+        // =========================
 
-    platforms.forEach(function(platform) {
+        function drawBall() {
 
-        const ballBottom =
-            ball.y + ball.radius;
+            ctx.beginPath();
 
-        const previousBottom =
-            ball.y + ball.radius - ball.speedY;
+            ctx.arc(
+                ball.x,
+                ball.y,
+                ball.radius,
+                0,
+                Math.PI * 2
+            );
 
+            ctx.fillStyle = "#ff4d6d";
 
-        const insideX =
-            ball.x + ball.radius > platform.x &&
-            ball.x - ball.radius < platform.x + platform.width;
+            ctx.fill();
 
+            ctx.strokeStyle = "#222";
+            ctx.lineWidth = 3;
 
-        if (
-            insideX &&
-            ball.speedY > 0 &&
-            ballBottom >= platform.y &&
-            previousBottom <= platform.y + 10
-        ) {
+            ctx.stroke();
 
-            // 발판 위에 착지
+            ctx.closePath();
+
+        }
+
+
+        // =========================
+        // 발판 충돌
+        // =========================
+
+        function checkPlatformCollision() {
+
+            platforms.forEach(function(platform) {
+
+                const ballBottom =
+                    ball.y + ball.radius;
+
+                const previousBottom =
+                    ball.y + ball.radius - ball.speedY;
+
+                const insideX =
+                    ball.x + ball.radius > platform.x &&
+                    ball.x - ball.radius < platform.x + platform.width;
+
+
+                if (
+                    insideX &&
+                    ball.speedY > 0 &&
+                    ballBottom >= platform.y &&
+                    previousBottom <= platform.y + 12
+                ) {
+
+                    ball.y =
+                        platform.y - ball.radius;
+
+                    ball.speedY =
+                        -11.5;
+
+                    score++;
+
+                    document.getElementById("score").innerText =
+                        score;
+
+                }
+
+            });
+
+        }
+
+
+        // =========================
+        // 다음 맵 생성
+        // =========================
+
+        function nextLevel() {
+
+            level++;
+
+            document.getElementById("level").innerText =
+                level;
+
+
+            // 레벨 올라갈수록 조금 더 어려움
+            gravity += 0.01;
+
+            moveSpeed += 0.08;
+
+
+            createPlatforms();
+
+
+            ball.x =
+                canvas.width / 2;
+
             ball.y =
-                platform.y - ball.radius;
+                560;
+
+            ball.speedY =
+                -11;
+
+            ball.speedX =
+                0;
+
+        }
 
 
-            // 자동으로 다시 튀기
-            ball.speedY = -11;
+        // =========================
+        // 공 이동
+        // =========================
+
+        function moveBall() {
+
+            if (leftPressed) {
+
+                ball.speedX -= 0.6;
+
+            }
+
+            if (rightPressed) {
+
+                ball.speedX += 0.6;
+
+            }
+
+            if (!leftPressed && !rightPressed) {
+
+                ball.speedX *= 0.90;
+
+            }
 
 
-            // 점수 증가
-            score++;
+            // 최대 좌우 속도 제한
+            if (ball.speedX > moveSpeed) {
+                ball.speedX = moveSpeed;
+            }
+
+            if (ball.speedX < -moveSpeed) {
+                ball.speedX = -moveSpeed;
+            }
+
+
+            ball.x += ball.speedX;
+
+
+            // 중력
+            ball.speedY += gravity;
+
+            ball.y += ball.speedY;
+
+
+            // 양 옆 벽에서 튕김
+            if (ball.x - ball.radius <= 0) {
+
+                ball.x = ball.radius;
+
+                ball.speedX *= -0.7;
+
+            }
+
+
+            if (
+                ball.x + ball.radius >= canvas.width
+            ) {
+
+                ball.x =
+                    canvas.width - ball.radius;
+
+                ball.speedX *= -0.7;
+
+            }
+
+
+            checkPlatformCollision();
+
+
+            // 위까지 도달하면 다음 맵
+            if (ball.y < 20) {
+
+                nextLevel();
+
+            }
+
+
+            // 아래로 떨어지면 게임 오버
+            if (
+                ball.y >
+                canvas.height + 50
+            ) {
+
+                gameOver = true;
+
+            }
+
+        }
+
+
+        // =========================
+        // 게임 오버 화면
+        // =========================
+
+        function drawGameOver() {
+
+            ctx.fillStyle =
+                "rgba(0,0,0,0.65)";
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            ctx.fillStyle =
+                "white";
+
+            ctx.font =
+                "50px Arial";
+
+            ctx.textAlign =
+                "center";
+
+            ctx.fillText(
+                "💥 GAME OVER",
+                canvas.width / 2,
+                260
+            );
+
+
+            ctx.font =
+                "28px Arial";
+
+            ctx.fillText(
+                "Score: " + score,
+                canvas.width / 2,
+                320
+            );
+
+
+            ctx.fillText(
+                "Level: " + level,
+                canvas.width / 2,
+                365
+            );
+
+
+            ctx.font =
+                "22px Arial";
+
+            ctx.fillText(
+                "Press SPACE to restart",
+                canvas.width / 2,
+                430
+            );
+
+        }
+
+
+        // =========================
+        // 재시작
+        // =========================
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.code === "Space" &&
+                    gameOver
+                ) {
+
+                    restartGame();
+
+                }
+
+            }
+        );
+
+
+        function restartGame() {
+
+            score = 0;
+            level = 1;
+
+            gravity = 0.48;
+            moveSpeed = 5.5;
 
             document.getElementById("score").innerText =
                 score;
 
+            document.getElementById("level").innerText =
+                level;
+
+
+            ball.x =
+                300;
+
+            ball.y =
+                500;
+
+            ball.speedX =
+                0;
+
+            ball.speedY =
+                -11;
+
+
+            createPlatforms();
+
+            gameOver =
+                false;
+
         }
 
-    });
 
-}
+        // =========================
+        // 게임 루프
+        // =========================
 
+        function gameLoop() {
 
-// ================================
-// 공 움직이기
-// ================================
-
-function moveBall() {
-
-    if (leftPressed) {
-
-        ball.speedX = -moveSpeed;
-
-    }
-
-    else if (rightPressed) {
-
-        ball.speedX = moveSpeed;
-
-    }
-
-    else {
-
-        ball.speedX *= 0.85;
-
-    }
-
-
-    ball.x += ball.speedX;
-
-
-    // 중력
-    ball.speedY += gravity;
-
-    ball.y += ball.speedY;
-
-
-    // 왼쪽 벽
-    if (
-        ball.x - ball.radius < 0
-    ) {
-
-        ball.x = ball.radius;
-
-        ball.speedX = 0;
-
-    }
-
-
-    // 오른쪽 벽
-    if (
-        ball.x + ball.radius > canvas.width
-    ) {
-
-        ball.x =
-            canvas.width - ball.radius;
-
-        ball.speedX = 0;
-
-    }
-
-
-    // 발판 충돌
-    checkPlatformCollision();
-
-
-    // 화면 위까지 도착하면 승리
-    if (
-        ball.y < 30
-    ) {
-
-        gameOver = true;
-
-        setTimeout(function() {
-
-            alert(
-                "🎉 게임 클리어!\n점수: " + score
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
             );
 
-            restartGame();
 
-        }, 100);
+            movePlatforms();
 
-    }
+            drawPlatforms();
+
+            drawBall();
 
 
-    // 아래로 떨어지면 게임 오버
-    if (
-        ball.y > canvas.height + 50
-    ) {
+            if (!gameOver) {
 
-        gameOver = true;
+                moveBall();
 
-        setTimeout(function() {
+            }
 
-            alert(
-                "💥 Game Over!\n점수: " + score
+            else {
+
+                drawGameOver();
+
+            }
+
+
+            requestAnimationFrame(
+                gameLoop
             );
 
-            restartGame();
-
-        }, 100);
-
-    }
-
-}
+        }
 
 
-// ================================
-// 게임 다시 시작
-// ================================
+        // 시작
+        createPlatforms();
 
-function restartGame() {
+        gameLoop();
 
-    ball.x = 100;
-
-    ball.y = 450;
-
-    ball.speedX = 0;
-
-    ball.speedY = -10;
-
-    score = 0;
-
-    document.getElementById("score").innerText =
-        score;
-
-    gameOver = false;
-
-}
-
-
-// ================================
-// 게임 반복
-// ================================
-
-function gameLoop() {
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-
-    drawPlatforms();
-
-    drawBall();
-
-
-    if (!gameOver) {
-
-        moveBall();
-
-    }
-
-
-    requestAnimationFrame(gameLoop);
-
-}
-
-
-// 게임 시작
-gameLoop();
-
-</script>
+    </script>
 
 </body>
+
 </html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Pronunciation Studio</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #dbeafe, #fce7f3);
+    min-height: 100vh;
+    margin: 0;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.container {
+    max-width: 650px;
+    margin: 30px auto;
+    background: white;
+    padding: 35px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+h1 {
+    color: #334155;
+}
+
+.subtitle {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    padding: 18px;
+    font-size: 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 15px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+button {
+    flex: 1;
+    padding: 17px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.american {
+    background: #3b82f6;
+    color: white;
+}
+
+.british {
+    background: #ec4899;
+    color: white;
+}
+
+.stop {
+    background: #475569;
+    color: white;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.speed-box {
+    margin-top: 25px;
+    background: #f1f5f9;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+input[type="range"] {
+    width: 90%;
+    margin-top: 15px;
+}
+
+.status {
+    color: #64748b;
+    margin-top: 20px;
+    min-height: 25px;
+}
+
+.notice {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 25px;
+}
+
+@media(max-width:480px) {
+    .container {
+        padding: 20px;
+    }
+
+    .buttons {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎙️ English Pronunciation Studio</h1>
+
+<p class="subtitle">
+영어 문장을 입력하고 미국식·영국식 발음을 비교해 보세요!
+</p>
+
+<textarea id="englishText"
+placeholder="영어 단어나 문장을 자유롭게 입력하세요.
+
+Example:
+I would like a bottle of water."></textarea>
+
+<div class="buttons">
+    <button class="american" onclick="speak('en-US')">
+        🇺🇸 American Accent
+    </button>
+
+    <button class="british" onclick="speak('en-GB')">
+        🇬🇧 British Accent
+    </button>
+</div>
+
+<button class="stop" onclick="stopSpeech()">
+    ⏹ Stop Speaking
+</button>
+
+<div class="speed-box">
+    <h3>🎚 Speaking Speed</h3>
+
+    <strong id="speedDisplay">1.0x</strong>
+
+    <br>
+
+    <input type="range"
+           id="speed"
+           min="0.5"
+           max="1.5"
+           step="0.1"
+           value="1">
+
+    <p>Slow ← Normal → Fast</p>
+</div>
+
+<p class="status" id="status">
+🎧 Ready to speak!
+</p>
+
+<p class="notice">
+English Learning App ✨
+</p>
+
+</div>
+
+<script>
+let voices = [];
+let playbackId = 0;
+
+const synth = window.speechSynthesis;
+const statusText = document.getElementById("status");
+const speedInput = document.getElementById("speed");
+const speedDisplay = document.getElementById("speedDisplay");
+
+function loadVoices() {
+    if (!synth) return;
+    voices = synth.getVoices();
+}
+
+if (synth) {
+    loadVoices();
+    synth.addEventListener("voiceschanged", loadVoices);
+}
+
+function findVoice(language) {
+    loadVoices();
+
+    const matchingVoices = voices.filter(voice =>
+        voice.lang.replace("_", "-").toLowerCase()
+        === language.toLowerCase()
+    );
+
+    return matchingVoices[0] || null;
+}
+
+function speak(language) {
+    const text = document.getElementById("englishText").value.trim();
+
+    if (!synth) {
+        statusText.textContent =
+            "이 브라우저는 음성 재생을 지원하지 않습니다.";
+        return;
+    }
+
+    if (!text) {
+        statusText.textContent = "영어 문장을 먼저 입력해 주세요!";
+        return;
+    }
+
+    playbackId++;
+    const currentId = playbackId;
+
+    synth.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = findVoice(language);
+
+    if (!voice) {
+        statusText.textContent =
+            language + " 음성이 없습니다. 기기의 음성 설정을 확인하세요.";
+        return;
+    }
+
+    utterance.voice = voice;
+    utterance.lang = language;
+    utterance.rate = Number(speedInput.value);
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+    utterance.onstart = function() {
+        if (currentId !== playbackId) return;
+
+        statusText.textContent =
+            language === "en-US"
+            ? "🇺🇸 미국식 영어 재생 중..."
+            : "🇬🇧 영국식 영어 재생 중...";
+    };
+
+    utterance.onend = function() {
+        if (currentId !== playbackId) return;
+        statusText.textContent = "✅ 재생 완료!";
+    };
+
+    utterance.onerror = function(event) {
+        if (currentId !== playbackId) return;
+
+        if (event.error !== "canceled" &&
+            event.error !== "interrupted") {
+            statusText.textContent =
+                "⚠️ 음성 재생 오류: " + event.error;
+        }
+    };
+
+    synth.speak(utterance);
+}
+
+function stopSpeech() {
+    playbackId++;
+
+    if (synth) {
+        synth.cancel();
+    }
+
+    statusText.textContent = "⏹ 재생 중지";
+}
+
+speedInput.addEventListener("input", function() {
+    speedDisplay.textContent =
+        Number(speedInput.value).toFixed(1) + "x";
+});
+</script>
+
+</body>
+</html>
